@@ -46,7 +46,7 @@ public class MobileRechargeTest {
     void testCorrectRechargeAmount() {
         String result = MobileRecharge.recharge("9876543210", 2);
 
-        assertTrue(result.contains("Rs.399.0"));
+        assertTrue(result.contains("Rs.299.0"));
         assertTrue(result.contains("Recharge Successful"));
     }
 

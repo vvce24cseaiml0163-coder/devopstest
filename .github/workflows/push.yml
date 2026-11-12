@@ -1,46 +1,37 @@
-name: Mobile Recharge Application CI
+name: Mobile Recharge Docker CI/CD
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  build-and-test:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
           java-version: '17'
+          distribution: 'temurin'
           cache: maven
 
-      - name: Compile Java Code
-        run: mvn compile
+      - name: Build Java Application
+        run: mvn clean package
 
-      - name: Run JUnit Tests
-        run: mvn test
-
-      - name: Package Application
-        run: mvn package
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          name: mobile-recharge-application
-          path: target/*.jar
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Upload JUnit Test Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-test-reports
-          path: target/surefire-reports/
+      - name: Build Docker Image
+        run: |
+          docker build -t YOUR_DOCKER_USERNAME/mobile-recharge-app:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push YOUR_DOCKER_USERNAME/mobile-recharge-app:latest
