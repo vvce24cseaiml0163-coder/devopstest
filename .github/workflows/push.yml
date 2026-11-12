@@ -1,72 +1,49 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+name: Mobile Recharge Docker CI/CD
 
-    <modelVersion>4.0.0</modelVersion>
+on:
+  push:
+    branches:
+      - main
 
-    <groupId>com.recharge</groupId>
-    <artifactId>mobile-recharge-app</artifactId>
-    <version>1.0</version>
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
 
-    <name>Mobile Recharge Application</name>
-    <description>Java Mobile Recharge Application with JUnit 5 and Docker</description>
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
 
-    <dependencies>
+      - name: Build Java Application
+        run: mvn clean package
 
-        <!-- JUnit 5 Dependency -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.10.2</version>
-            <scope>test</scope>
-        </dependency>
+      - name: Docker Hub Login
+        uses: docker/login-action@v3
+        with:
+          username: karthici071
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    </dependencies>
+      - name: Build Docker Image
+        run: docker build -t karthici071/mobile-recharge-app:latest .
 
-    <build>
-        <plugins>
+      - name: Push Docker Image
+        run: docker push karthici071/mobile-recharge-app:latest
 
-            <!-- Java Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-recharge-app-jar
+          path: target/*.jar
 
-            <!-- Main Class Manifest -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.recharge.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
-            <!-- JUnit Test Execution -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
-            </plugin>
-
-        </plugins>
-    </build>
-
-</project>
+      - name: Upload JUnit Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-report
+          path: target/surefire-reports/*.xml
