@@ -1,24 +1,46 @@
+name: Mobile Recharge Application CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  maven-test:
+  build-and-test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
           cache: maven
 
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v1
+      - name: Compile Java Code
+        run: mvn compile
 
-      - name: Verify Java and Chrome
-        run: |
-          java -version
-          google-chrome --version
+      - name: Run JUnit Tests
+        run: mvn test
 
-      - name: Run Maven tests
-        run: mvn clean test
+      - name: Package Application
+        run: mvn package
+
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-recharge-application
+          path: target/*.jar
+
+      - name: Upload JUnit Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-test-reports
+          path: target/surefire-reports/
