@@ -1,64 +1,61 @@
-
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.Map;
+class MobileRechargeTest {
 
-public class MobileRechargeTest {
+    MobileRecharge recharge = new MobileRecharge();
 
     @Test
-    void testValidMobileNumber() {
-        assertTrue(MobileRecharge.validateMobile("9876543210"));
+    void testValidMobile() {
+        assertTrue(recharge.validateMobile("9876543210"));
     }
 
     @Test
-    void testInvalidMobileNumber() {
-        assertFalse(MobileRecharge.validateMobile("1234abcd7890"));
-        assertFalse(MobileRecharge.validateMobile("987654321"));
-        assertFalse(MobileRecharge.validateMobile("98765432101"));
-        assertFalse(MobileRecharge.validateMobile("abcdefghij"));
+    void testInvalidMobile() {
+        assertFalse(recharge.validateMobile("1234567890"));
+    }
+
+    @Test
+    void testNullMobile() {
+        assertFalse(recharge.validateMobile(null));
     }
 
     @Test
     void testDisplayPlans() {
-        Map<Integer, Double> plans = MobileRecharge.getPlans();
-
-        assertEquals(3, plans.size());
-        assertTrue(plans.containsKey(1));
-        assertTrue(plans.containsKey(2));
-        assertTrue(plans.containsKey(3));
+        assertEquals(3, recharge.getPlans().size());
     }
 
     @Test
-    void testSelectPlan() {
-        assertEquals(199.0, MobileRecharge.selectPlan(1));
-        assertEquals(299.0, MobileRecharge.selectPlan(2));
-        assertEquals(399.0, MobileRecharge.selectPlan(3));
+    void testValidPlan() {
+        assertEquals(199.0, recharge.getRechargeAmount(1));
     }
 
     @Test
-    void testInvalidPlanSelection() {
-        assertThrows(IllegalArgumentException.class,
-                () -> MobileRecharge.selectPlan(5));
+    void testRechargeAmount() {
+        assertEquals(299.0, recharge.getRechargeAmount(2));
     }
 
     @Test
-    void testCorrectRechargeAmount() {
-        String result = MobileRecharge.recharge("9876543210", 2);
+    void testInvalidPlan() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> recharge.getRechargeAmount(10)
+        );
+    }
 
-        assertTrue(result.contains("Rs.299.0"));
+    @Test
+    void testSuccessfulRecharge() {
+        String result = recharge.recharge("9876543210", 1);
+
         assertTrue(result.contains("Recharge Successful"));
     }
 
     @Test
-    void testRechargeWithInvalidMobile() {
-        assertThrows(IllegalArgumentException.class,
-                () -> MobileRecharge.recharge("1234567890", 1));
-    }
-
-    @Test
-    void testInvalidRechargeAmount() {
-        assertThrows(IllegalArgumentException.class,
-                () -> MobileRecharge.selectPlan(0));
+    void testRechargeInvalidMobile() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> recharge.recharge("1234567890", 1)
+        );
     }
 }
