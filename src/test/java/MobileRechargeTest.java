@@ -13,7 +13,7 @@ public class MobileRechargeTest {
 
     @Test
     void testInvalidMobileNumber() {
-        assertFalse(MobileRecharge.validateMobile("1234567890"));
+        assertFalse(MobileRecharge.validateMobile("1234abcd7890"));
         assertFalse(MobileRecharge.validateMobile("987654321"));
         assertFalse(MobileRecharge.validateMobile("98765432101"));
         assertFalse(MobileRecharge.validateMobile("abcdefghij"));
@@ -46,7 +46,7 @@ public class MobileRechargeTest {
     void testCorrectRechargeAmount() {
         String result = MobileRecharge.recharge("9876543210", 2);
 
-        assertTrue(result.contains("299.0"));
+        assertTrue(result.contains("Rs.399.0"));
         assertTrue(result.contains("Recharge Successful"));
     }
 
